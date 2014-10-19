@@ -1,0 +1,46 @@
+<script src="//cdn.jsdelivr.net/foundation/5.3.1/js/vendor/modernizr.js"></script>
+<script src="https://checkout.spike.cc/v1/checkout.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+
+<div>
+
+  <% param_prefix = "payment_source[#{payment_method.id}]" %>
+
+</div>
+<div class="form-buttons" data-hook="buttons">
+  <input id="token" type="hidden" name="<%= param_prefix %>[token]" value="">
+  <button name="purchase" data-button-guest="0"><%= Spree.t(:spike_payment_for_member) %></button>
+  <button name="purchase" data-button-guest="1"><%= Spree.t(:spike_payment_for_guest) %></button>
+</div>
+
+<script>
+  $(document).ready(function() {
+    $('form#checkout_form_payment > div.form-buttons').hide();
+  })
+  var handler = SpikeCheckout.configure({
+    key: "pk_test_OFTKROvOErrClinnUULgZiMm",
+    token: function(token, args) {
+      $("#customButton").attr('disabled', 'disabled');
+      $(':input[type=hidden][name="<%= param_prefix %>[token]"]').val(token.id);
+      console.log(token.id);
+      $('form#checkout_form_payment').submit();
+    },
+    opened: function(e) {
+      console.log("Event: Overlay opened.");
+    },
+    closed: function(e) {
+      console.log("Event: Overlay closed.");
+    }
+  });
+
+  $('button[name="purchase"]').click(function(e) {
+    handler.open({
+      name: "Fermart",
+      amount: <%= @order.total %>,
+      currency: "<%= @order.currency %>",
+      email: "<%= @order.email %>",
+      guest: (e.target.dataset.buttonGuest == "0") ? false : true
+    });
+    e.preventDefault();
+  });
+</script>
